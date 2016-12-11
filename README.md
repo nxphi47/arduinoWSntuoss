@@ -1,25 +1,23 @@
-#------------NTUOSS Arduino Workshop--------------
-Created by: Xuan Phi Nguyen
+#NTUOSS Arduino Workshop
 This Workshop is aimed at the basic about the arduino board
 with some simple tutorial exercises
-#I/ Installation:
+Created by: Xuan Phi Nguyen
 
-1 - with a real arduino board we download the Arduino IDE with some extensions:
-----------------------------------
-[link arduino IDE](www.goole.com)
+##I/ Installation:
 
-[Visual Micro](www.google.com) extensions with Visual studio
+###with a real arduino board and Arduino IDE with some extensions:
+[Arduino IDE](https://www.arduino.cc/en/Main/Software)
 
-[xcode](apple.com) on macos
+[Visual Micro](http://www.visualmicro.com/) extensions with Visual studio and Arduino IDE
 
-[plaformio](plaformio)
+[Platformio](http://platformio.org/) Extensions with Arduino IDE using ATOM text editor
 
-2 - with 123circuit.io
--------------------------------------
+###with https://circuits.io
+
 this website used to simulate the program of the arduino operation
 with many electrical components that act as real
 
-#II/ About the Arduino
+##II/ About the Arduino
 Electronic board to control electrical components.
 
 Controlled with many pins with different functionality
@@ -37,68 +35,191 @@ Use with raspberry pi via I2C
 
 About digital and analog
 
-#III/ tutorial - to be conducted on 123circuit.io
+##III/ tutorial - to be conducted on 123circuit.io
+###0 - basic syntax
 
-0 - basic syntax
-###Known about C/C++, it is exactly the same, except for the lack of library
-	#include <lcd>
+Known about C/C++, it is exactly the same, except for the lack of library
 
-	int foo = 2;
-	int pin1 = 13;
-	int pin2 = 9;
+```
+#include <lcd>
 
-	void setup(){
-		/*Run only once since the arduino reset!*/
+int foo = 2;
+int pin1 = 13;
+int pin2 = 9;
 
-		// setup pinMode for digital and analog pin
-		pinMode(pin1, OUTPUT);
-		pinMode(pint2, INPUT);
-		pinMode(A0, OUTPUT);
+void setup(){
+    /*Run only once since the arduino reset!*/
+    // setup pinMode for digital and analog pin
+    pinMode(pin1, OUTPUT);
+    pinMode(pint2, INPUT);
+    pinMode(A0, OUTPUT);
 
-		// Serial port to communicate with ardunino in real-time
-		Serial.begin(9600);
-	};
+    // Serial port to communicate with ardunino in real-time
+    Serial.begin(9600);
+};
 
-	void loop(){
-		/*Run in loop all over again*/
+void loop(){
+    /*Run in loop all over again*/
+    // set the pin1 to high
+    digitalWrite(pin1, HIGH);
+    // read the input at pint2
+    digitalRead(pin1); // = 1
+    // read the input of analog pin
+    int x = analogRead(A0);
 
-		// set the pin1 to high
-		digitalWrite(pin1, HIGH);
-		// read the input at pint2
-		digitalRead(pin1); // = 1
-		// read the input of analog pin
-		int x = analogRead(A0);
+    Serial.println(x);
+}
 
-		Serial.println(x);
-	}
+for (uint_8 i =0; i < 128; i++){
 
-	for (uint_8 i =0; i < 128; i++){
+}
+```
 
-	}
+###1 - Blinking
 
-------------------------------
-1 - Blinking
-------------------------------
-plug in the LED to pin 13 (remember to put the anode - longer) and cathode to the ground.
+```
+// declare variable
+int pin = 13;
 
-load the program, and see what happen? is this a good way to do it???.
+// setup function to be run once
+void setup(){
+    pinMode(pin, OUTPUT);
+}
 
-try to plug the led in series with a resistor (xxx Ohm) and try again??.
+// loop function to be executed repeated after setup
+void loop() {
+    // you execution code goes herer
+    digitalWrite(pin, HIGH);	// turn it on
+    delay(500);					// delay for 500milis
+    digitalWrite(pin, LOW);
+    delay(500);					// delay for 500milis
 
-explain why?.
+}
+```
 
-Try to modify the delay and see the effect?
+* load the program, and see what happen? is this a good way to do it???.
 
-2 - dimming and flashing with button
-----------------------------------
-put the LED to pin 9
-3 - work with servo
-----------------------------------
-4 - light sensor
-----------------------------------
-5 - LCD (optional)
-----------------------------------
-Finale challenge - build a automatic gantry
-----------------------------------
-you gonna build a auto gantry which can detect a car comming, open the gantry
-and close when the car pass by
+* try to plug the led in series with a resistor (xxx Ohm) and try again??.
+
+* explain why?.
+
+* Try to modify the delay and see the effect?
+
+###2 - dimming and flashing with button
+```
+// declare variable
+int pin = 9; // a PWN pin
+int count = 0;
+
+// setup function to be run once
+void setup(){
+    pinMode(pin, OUTPUT);
+}
+
+// loop function to be executed repeated after setup
+void loop() {
+
+    // you execution code goes here
+    if (count >=255) {
+        count = 0;
+        /* code */
+    }
+    // change the code for the LED to gradually increase light intensity
+
+    analogWrite(pin, count);
+    // you can also change to analog pin
+    // remember that analog pin accept 10bit integer number
+    // analogWrite(pin, A0);
+    delay(5);
+}
+```
+
+
+###3 - Servo Controller with potential meter and photoresistor
+
+Servo use PWM pin to controller its motion, so we attach it to pin 5
+```
+#include <Servo.h>
+
+// create Servo object
+Servo servo;
+
+int servoPin = 9;
+int buttonPin = 13;
+int potentialPin = A0;
+int lightPin = A1;
+int val;
+bool isPotential = true;
+
+void setup() {
+    pinMode(buttonPin, INPUT);
+    servo.attach(servoPin);
+}
+
+void loop() {
+    val = getAnalogInput();
+    servo.write(val);
+    delay(20); // delay to avoid sudden voltage change which cause unpreditability
+    if (digitalRead(buttonPin) == HIGH)  {
+        isPotential = !isPotential;
+    }
+
+
+}
+
+int getAnalogInput() {
+    if (isPotential){
+        return map(analogRead(potentialPin), 0, 1023, 0, 180); // map input value to 180 degree
+    }
+    else {
+        return map(analogRead(lightPin), 0, 1023, 0, 180); // map input value to 180 degree
+
+    }
+}
+```
+
+###4 - LCD - 16bit
+
+* Use LCD to display the photoresistor value.
+
+```
+// include the LCD's library
+#include <LiquidCrystal.h>
+
+// initialize LCD object with the numbers of the interface pins:
+//               (RS, Enable, DB4, DB5, DB6, DB7)
+LiquidCrystal lcd(7,    8,    9,   10,  11,  12);
+
+// light sensor
+int lightPin = A0;
+
+// main setup
+void setup() {
+    lcd.begin(16, 2); // init the LCD object to 16x2 size
+    // by default, the cursor position is at (0,0)
+    lcd.print("Light: ");
+}
+
+// the loop
+void loop() {
+    int val = analogRead(lightPin);
+    print(String(val) + "    ", 12, 0);
+    delay(20);
+
+}
+
+// Some LCD function
+void print(String str, int i, int j) {
+    lcd.setCursor(i, j);
+    lcd.print(str);
+}
+
+
+```
+
+###Finale challenge - build a automatic gantry
+* Let's build a automatic gantry that can detect a car comming - Use Photoresistor
+* Make it open the gantry if the use push some button - Use servo
+* Close the gantry 2s after the car pass
+* Bonus: use LCD to display price
+

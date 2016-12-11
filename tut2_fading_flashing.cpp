@@ -13,11 +13,12 @@ void setup(){
 
 // loop function to be executed repeated after setup
 void loop() {
-	// you execution code goes herer
+	// you execution code goes here
 	if (count >=255) {
 		count = 0;
 		/* code */
 	}
+	// change the code for the LED to gradually increase light intensity
 	digitalWrite(pin, count);
 	delay(100);
 }
