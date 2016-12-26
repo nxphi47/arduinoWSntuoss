@@ -27,9 +27,14 @@ Controlled with many pins with different functionality
 
 Communication port: I2C, serial bus, software serial library
 
-System specification: 	
-* CPU:
-* RAM:
+System specification:
+* MicroController:      ATmega328P
+* Clock speed:			16 MHz (Veryyyy small)
+* Operating Voltage:	5V
+* Digital Pin:			14 (6 of which is PWM)
+* Analog pin:			6
+* RAM:					2KB (Veryyyy Small)
+* Flash memory:		    32KB (Very small too)
 
 Use with raspberry pi via I2C
 
@@ -41,8 +46,6 @@ About digital and analog
 Known about C/C++, it is exactly the same, except for the lack of library
 
 ```
-#include <lcd>
-
 int foo = 2;
 int pin1 = 13;
 int pin2 = 9;
@@ -109,28 +112,49 @@ void loop() {
 ```
 // declare variable
 int pin = 9; // a PWN pin
+int buttonPin = 13; // change 2 mode dimming and flash
+int potentialPin = A0; // the potentiometer will track how fast it change
+bool buttonState = false; // false is dimming state, true is blinking state
+bool isLedHigh = false;
+bool currentState = false;
 int count = 0;
+int speed = 0;
 
 // setup function to be run once
 void setup(){
+    pinMode(buttonPin, INPUT);
     pinMode(pin, OUTPUT);
 }
 
 // loop function to be executed repeated after setup
 void loop() {
-
     // you execution code goes here
+    // read the button pin
+    if (digitalRead(buttonPin) == HIGH && !currentState) {
+        buttonState = !buttonState;
+        currentState = true;
+    }
+    else if (digitalRead(buttonPin) == LOW && currentState) {
+        currentState = false;
+    }
+    speed = map(analogRead(potentialPin), 0, 1023, 0, 1000);
+
     if (count >=255) {
         count = 0;
-        /* code */
     }
-    // change the code for the LED to gradually increase light intensity
 
-    analogWrite(pin, count);
-    // you can also change to analog pin
-    // remember that analog pin accept 10bit integer number
-    // analogWrite(pin, A0);
-    delay(5);
+    count+=5;
+    // change the code for the LED to gradually increase light intensity
+    if (buttonState) {
+        if (count == 255) {
+            digitalWrite(pin, isLedHigh?HIGH:LOW);
+            isLedHigh = !isLedHigh;
+        }
+    }
+    else {
+        analogWrite(pin, count);
+    }
+    delay(speed / 255 * 5);
 }
 ```
 
@@ -163,7 +187,6 @@ void loop() {
     if (digitalRead(buttonPin) == HIGH)  {
         isPotential = !isPotential;
     }
-
 
 }
 

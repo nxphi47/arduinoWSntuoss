@@ -70,3 +70,24 @@ void loop() {
   MovingStr move(str,speed);
   move.print();
 }
+
+
+
+
+void setup(){
+    /*Run only once since the arduino reset!*/
+    // setup pinMode for digital and analog pin
+    pinMode(pin1, OUTPUT);
+    pinMode(pin2, INPUT);
+    pinMode(A0, OUTPUT);
+    // Serial port to communicate with arduino in real-time
+    Serial.begin(9600);
+};
+
+void loop(){
+    /*Run in loop all over again*/
+    digitalWrite(pin1, HIGH); // set Pin1 to HIGH (5V)
+    digitalRead(pin2); // read Pin 2
+    int x = analogRead(A0);// read 10bit analogPin (0 - 1023)
+    Serial.println(x); // print to Serial monitor
+}
