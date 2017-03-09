@@ -81,7 +81,7 @@ for (uint_8 i =0; i < 128; i++){
 ###1 - Blinking
 
 ```
-// declare variable
+// declare variable, connet LED to pin 13
 int pin = 13;
 
 // setup function to be run once
@@ -110,13 +110,16 @@ void loop() {
 
 ###2 - dimming and flashing with button
 ```
+// Interchanging blinking mode or dimming mode with button
+// change dimming/blinking speed by the potentiometer
+
 // declare variable
-int pin = 9; // a PWN pin
+int pin = 9; // a PWN pin, value taken for analogWrite() from 0 to 255 (0 -> 5V)
 int buttonPin = 13; // change 2 mode dimming and flash
 int potentialPin = A0; // the potentiometer will track how fast it change
 bool buttonState = false; // false is dimming state, true is blinking state
 bool isLedHigh = false;
-bool currentState = false;
+bool currentState = false; // current state of the button
 int count = 0;
 int speed = 0;
 
@@ -129,42 +132,52 @@ void setup(){
 // loop function to be executed repeated after setup
 void loop() {
     // you execution code goes here
-    // read the button pin
+    // read the button digital pin
     if (digitalRead(buttonPin) == HIGH && !currentState) {
+        // transition of currentState from LOW -> HIGH when press button
         buttonState = !buttonState;
         currentState = true;
     }
     else if (digitalRead(buttonPin) == LOW && currentState) {
+        // transition of currentState from HIGH -> LOW when press button
         currentState = false;
     }
+    // mapping value of (0 -> 1023) to (0 -> 1000);
     speed = map(analogRead(potentialPin), 0, 1023, 0, 1000);
 
+    // return to value 0 when count exceed 255
     if (count >=255) {
         count = 0;
     }
 
+    // increment by 5 each iteration
     count+=5;
     // change the code for the LED to gradually increase light intensity
     if (buttonState) {
+        // True means it is digital input
         if (count == 255) {
+            // change state of LED every time count reach 255
             digitalWrite(pin, isLedHigh?HIGH:LOW);
             isLedHigh = !isLedHigh;
         }
     }
     else {
+        // gradually increase light intensity
         analogWrite(pin, count);
     }
+    // for every cycle of 255, delay a amount defined by "speed" for each 5 incremental step
     delay(speed / 255 * 5);
 }
 ```
 
 
-###3 - Servo Controller with potential meter and photoresistor
+###3 - Servo Controller with potentiometer and photoresistor
 
 Servo use PWM pin to controller its motion, so we attach it to pin 5
 ```
 #include <Servo.h>
-
+// servo is a motor that remain it rotational position under a provided PWM value voltage
+// control the direction of servo by potentiometer or light resistor
 // create Servo object
 Servo servo;
 
@@ -172,18 +185,30 @@ int servoPin = 9;
 int buttonPin = 13;
 int potentialPin = A0;
 int lightPin = A1;
+// angle value (0 -> 180) to set to the servo
 int val;
 bool isPotential = true;
 
+// execute once
 void setup() {
     pinMode(buttonPin, INPUT);
     servo.attach(servoPin);
+
+    // analogPin does not need declaration
 }
 
+
+// repeatedly executed
 void loop() {
+    // do not try to instantiate variable in the loop
+    // Since we have no garbage collection and will soon run out of memory
+    // int val = getAnalogInput();
+
     val = getAnalogInput();
-    servo.write(val);
+    servo.write(val); // receive input from 0 to 180
     delay(20); // delay to avoid sudden voltage change which cause unpreditability
+
+    // isPotential will keep flipping if we keep pressing the button
     if (digitalRead(buttonPin) == HIGH)  {
         isPotential = !isPotential;
     }
@@ -233,6 +258,7 @@ void loop() {
 
 // Some LCD function
 void print(String str, int i, int j) {
+    // set the cursor at column i, row j
     lcd.setCursor(i, j);
     lcd.print(str);
 }
