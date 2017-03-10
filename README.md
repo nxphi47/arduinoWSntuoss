@@ -240,6 +240,7 @@ LiquidCrystal lcd(7,    8,    9,   10,  11,  12);
 
 // light sensor
 int lightPin = A0;
+int val;
 
 // main setup
 void setup() {
@@ -250,7 +251,7 @@ void setup() {
 
 // the loop
 void loop() {
-    int val = analogRead(lightPin);
+    val = analogRead(lightPin);
     print(String(val) + "    ", 12, 0);
     delay(20);
 
